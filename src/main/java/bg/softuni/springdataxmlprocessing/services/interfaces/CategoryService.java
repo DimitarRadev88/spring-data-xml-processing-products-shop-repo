@@ -1,14 +1,12 @@
-package bg.softuni.springDataJsonProcessing.services.interfaces;
+package bg.softuni.springdataxmlprocessing.services.interfaces;
 
-import bg.softuni.springDataJsonProcessing.dtos.CategoryDto;
-import bg.softuni.springDataJsonProcessing.dtos.CategoryStatisticsDto;
-import bg.softuni.springDataJsonProcessing.models.Category;
-
-import java.util.List;
+import javax.xml.bind.JAXBException;
+import java.io.FileNotFoundException;
 
 public interface CategoryService {
-    void addAll(CategoryDto[] categoryDtos);
 
-    List<CategoryStatisticsDto> getCategoriesByProductCount();
+    void importCategories() throws JAXBException, FileNotFoundException;
+
+    void exportCategoriesWithAverageProductPriceAndTotalRevenueSortedByProductsSize() throws JAXBException;
 
 }

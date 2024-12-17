@@ -1,4 +1,4 @@
-package bg.softuni.springdataxmlprocessing.dtos;
+package bg.softuni.springdataxmlprocessing.dtos.category;
 
 import javax.xml.bind.annotation.*;
 

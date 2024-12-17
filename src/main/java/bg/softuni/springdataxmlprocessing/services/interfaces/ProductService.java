@@ -1,13 +1,13 @@
-package bg.softuni.springDataJsonProcessing.services.interfaces;
+package bg.softuni.springdataxmlprocessing.services.interfaces;
 
-import bg.softuni.springDataJsonProcessing.dtos.ProductDto;
-import bg.softuni.springDataJsonProcessing.dtos.ProductWithSellerFullNameDto;
-
+import javax.xml.bind.JAXBException;
+import java.io.FileNotFoundException;
 import java.math.BigDecimal;
-import java.util.List;
 
 public interface ProductService {
-    void addAll(ProductDto[] productDtos);
 
-    List<ProductWithSellerFullNameDto> getProductsInRange(BigDecimal from, BigDecimal to);
+    void importProducts() throws JAXBException, FileNotFoundException;
+
+    void exportProductsInRange(BigDecimal from, BigDecimal to) throws JAXBException;
+
 }

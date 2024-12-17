@@ -1,7 +1,8 @@
-package bg.softuni.springdataxmlprocessing.dtos;
+package bg.softuni.springdataxmlprocessing.dtos.user;
+
+import bg.softuni.springdataxmlprocessing.dtos.product.ProductExportWrapperDto;
 
 import javax.xml.bind.annotation.*;
-import java.util.List;
 
 @XmlRootElement(name = "user")
 @XmlAccessorType(XmlAccessType.FIELD)

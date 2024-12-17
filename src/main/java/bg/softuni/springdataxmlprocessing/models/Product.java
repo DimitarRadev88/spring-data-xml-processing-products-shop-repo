@@ -1,4 +1,4 @@
-package bg.softuni.springDataJsonProcessing.models;
+package bg.softuni.springdataxmlprocessing.models;
 
 import jakarta.persistence.*;
 

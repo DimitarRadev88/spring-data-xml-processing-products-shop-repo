@@ -1,4 +1,4 @@
-package bg.softuni.springdataxmlprocessing.dtos;
+package bg.softuni.springdataxmlprocessing.dtos.product;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;

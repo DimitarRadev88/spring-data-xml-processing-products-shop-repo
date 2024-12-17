@@ -1,4 +1,4 @@
-package bg.softuni.springdataxmlprocessing.dtos;
+package bg.softuni.springdataxmlprocessing.dtos.user;
 
 import javax.xml.bind.annotation.*;
 import java.util.List;

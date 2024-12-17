@@ -1,7 +1,6 @@
-package bg.softuni.springDataJsonProcessing.models;
+package bg.softuni.springdataxmlprocessing.models;
 
 import jakarta.persistence.*;
-import org.springframework.context.annotation.Configuration;
 
 @MappedSuperclass
 public abstract class BaseEntity {

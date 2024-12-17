@@ -1,69 +1,81 @@
-package bg.softuni.springDataJsonProcessing.services;
+package bg.softuni.springdataxmlprocessing.services;
 
-import bg.softuni.springDataJsonProcessing.dtos.*;
-import bg.softuni.springDataJsonProcessing.repositories.UserRepository;
-import bg.softuni.springDataJsonProcessing.services.interfaces.UserService;
-import bg.softuni.springDataJsonProcessing.models.User;
+import bg.softuni.springdataxmlprocessing.dtos.user.*;
+import bg.softuni.springdataxmlprocessing.models.User;
+import bg.softuni.springdataxmlprocessing.repositories.UserRepository;
+import bg.softuni.springdataxmlprocessing.services.interfaces.UserService;
+import bg.softuni.springdataxmlprocessing.utils.XMLParser;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
+import javax.xml.bind.JAXBException;
+import java.io.FileNotFoundException;
 import java.util.List;
 
 @Service
 public class UserServiceImpl implements UserService {
 
+    private static final String USERS_AND_PRODUCTS_XML_FILE_PATH = "src/main/resources/output/xml-files/users-and-products.xml";
+    private static final String USERS_SOLD_PRODUCTS_XML_FILE_PATH = "src/main/resources/output/xml-files/users-sold-products.xml";
+    private static final String USERS_XML_FILE_PATH = "src/main/resources/input/xml-files/users.xml";
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
+    private final XMLParser parser;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, ModelMapper modelMapper) {
+    public UserServiceImpl(UserRepository userRepository, ModelMapper modelMapper, XMLParser parser) {
         this.userRepository = userRepository;
         this.modelMapper = modelMapper;
+        this.parser = parser;
+    }
+
+    public void importUsers() throws JAXBException, FileNotFoundException {
+        UserWrapperDto users = parser.fromFile(USERS_XML_FILE_PATH, UserWrapperDto.class);
+
+        List<User> list = users
+                .getUsers()
+                .stream()
+                .map(dto -> modelMapper.map(dto, User.class))
+                .toList();
+
+        userRepository.saveAll(list);
     }
 
     @Override
-    public void addAll(UserDto[] userDtos) {
-        List<User> users = Arrays.stream(userDtos).map(dto -> modelMapper.map(dto, User.class)).toList();
+    public void exportUsersWithSoldProductsWithBuyers() throws JAXBException {
+        List<User> users = userRepository.findAllBySoldProductsBuyersNotEmpty();
 
-        userRepository.saveAll(users);
+        List<UserWithSoldProductDto> userDtos = users
+                .stream()
+                .map((element) -> modelMapper.map(element, UserWithSoldProductDto.class))
+                .toList();
+
+        UserExportWrapperDto wrapper = new UserExportWrapperDto();
+        wrapper.setUsers(userDtos);
+
+        parser.toFile(USERS_SOLD_PRODUCTS_XML_FILE_PATH, wrapper);
     }
 
     @Override
-    public List<UserWithSoldProductsDto> getUsersWithSuccessfullySoldProducts() {
-        return userRepository.findAllBySoldProductsBuyerNotEmpty()
+    public void exportUsersWithSoldProductsWithBuyersSortedBySoldProductsSizeAndLastName() throws JAXBException {
+        List<User> users = userRepository.findAllBySoldProductsBuyerNotEmptyOrderBySoldProductsCountDescLastNameAsc();
+
+        List<UserWithSoldProductWithNameAndPriceDto> list = users
                 .stream()
-                .map(user -> modelMapper.map(user, UserWithSoldProductsDto.class))
+                .map(u -> getUserWithSoldProductWithNameAndPriceDto(u))
                 .toList();
+
+        UserWrapperWithCountDto wrapper = new UserWrapperWithCountDto();
+        wrapper.setCount(list.size());
+        wrapper.setUsers(list);
+
+        parser.toFile(USERS_AND_PRODUCTS_XML_FILE_PATH, wrapper);
     }
 
-    @Override
-    public UsersWrapperDto getUsersWithSoldProductsWrapper() {
-        List<UserWithSoldProductsWrapperDto> list = userRepository
-                .findAllByHavingOneOrMoreSoldProductsBuyer()
-                .stream()
-                .map(u ->  getUserWithSoldProductsWrapperDto(u))
-                .toList();
-
-        UsersWrapperDto wrapperDto = new UsersWrapperDto();
-        wrapperDto.setUsers(list);
-        wrapperDto.setUsersCount(list.size());
-
-        return wrapperDto;
-    }
-
-    private UserWithSoldProductsWrapperDto getUserWithSoldProductsWrapperDto(User u) {
-        UserWithSoldProductsWrapperDto dto = modelMapper
-                .map(u, UserWithSoldProductsWrapperDto.class);
-        ProductWrapperDto productWrapperDto = new ProductWrapperDto();
-        List<ProductDto> soldProductDtos = u.getSoldProducts()
-                .stream()
-                .map(sp -> modelMapper.map(sp, ProductDto.class))
-                .toList();
-        productWrapperDto.setCount(soldProductDtos.size());
-        productWrapperDto.setProducts(soldProductDtos);
-        dto.setSoldProducts(productWrapperDto);
-        return dto;
+    private UserWithSoldProductWithNameAndPriceDto getUserWithSoldProductWithNameAndPriceDto(User u) {
+        UserWithSoldProductWithNameAndPriceDto map = modelMapper.map(u, UserWithSoldProductWithNameAndPriceDto.class);
+        map.getSoldProducts().setCount(map.getSoldProducts().getSoldProducts().size());
+        return map;
     }
 }
